@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vendor entry</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<main class="page">
+<header class="top"><h1>Vendor entry</h1><p class="sub">For the bus service: one entry per trip.</p></header>
+<p class="banner changed"><span><strong>Prototype only (Wizard-of-Oz).</strong> In the real service this entry would reach every student's phone. Here it updates the student page open in this browser.</span></p>
+<form id="f" novalidate class="card">
+<div class="field"><label for="route">Route</label><select id="route"><option value="A">Route A</option><option value="B">Route B</option></select></div>
+<div class="field"><label for="trip">Trip</label><select id="trip"></select></div>
+<fieldset><legend>Status today</legend>
+<label class="opt"><input type="radio" name="st" id="s-ann" value="announced" checked> Announced (bus assigned)</label>
+<label class="opt"><input type="radio" name="st" id="s-chg" value="changed"> Changed time or bus</label>
+<label class="opt"><input type="radio" name="st" id="s-off" value="notrunning"> Not running</label>
+<label class="opt"><input type="radio" name="st" id="s-clr" value="clear"> Clear (back to not yet announced)</label>
+</fieldset>
+<div class="field"><label for="bus">Bus number</label><input type="text" id="bus" placeholder="e.g. Bus 14"></div>
+<div class="field" id="timeField" hidden><label for="time">New departure time</label><input type="time" id="time"></div>
+<div class="field"><label for="note">Notice for students (optional)</label><input type="text" id="note" placeholder="e.g. Leaves from the Gate 4 stand"></div>
+<p id="err" class="err" role="alert"></p>
+<button class="btn" type="submit">Save and notify students</button>
+<p id="msg" role="status"></p>
+</form>
+<p><a href="index.html" target="_blank" rel="noopener">Open the student page</a></p>
+<button type="button" class="btn ghost" id="reset">Reset today's entries to the sample</button>
+</main>
+<script src="app.js"></script>
+<script>
+
+var DATA = null, started = null, $ = function(id){ return document.getElementById(id); };
+function fill(){ var r = DATA.routes[$("route").value];
+  $("trip").innerHTML = r.trips.map(function(t){ return "<option value=\"" + t.id + "\">" + fmt24(t.time) + " " + t.dir.toLowerCase() + "</option>"; }).join(""); }
+function mode(){ var s = document.querySelector("input[name=st]:checked").value; $("timeField").hidden = s!=="changed"; }
+loadData().then(function(d){ DATA = d; fill(); var o = $("trip").querySelector("option[value=\"A-1430\"]"); if(o) o.selected = true; });
+$("route").onchange = fill;
+$("f").addEventListener("change", mode);
+$("f").addEventListener("input", function(){ if(!started) started = Date.now(); });
+$("f").addEventListener("change", function(){ if(!started) started = Date.now(); });
+$("f").addEventListener("submit", function(e){ e.preventDefault(); if(!DATA) return;
+  var V = vendorState(DATA), id = $("trip").value, s = document.querySelector("input[name=st]:checked").value, bus = $("bus").value.trim(), tm = $("time").value;
+  var base = DATA.routes[id.split("-")[0]].trips.filter(function(t){ return t.id===id; })[0];
+  $("err").textContent = "";
+  if((s==="announced") && !bus){ $("err").textContent = "Enter the bus number, for example Bus 14."; $("bus").focus(); return; }
+  if(s==="changed" && !tm){ $("err").textContent = "Enter the new departure time."; $("time").focus(); return; }
+  var old = V.trips[id], oldBus = (old && old.bus) || base.bus || null;
+  if(s==="clear") delete V.trips[id];
+  else V.trips[id] = { status:s, bus: bus || oldBus || "", note: $("note").value.trim(), time: s==="changed" ? tm : undefined, prevBus: (s==="changed" && bus && oldBus && bus!==oldBus) ? oldBus : undefined };
+  V.updatedAt = now().getTime(); set(KEY.vendor, V);
+  var secs = started ? Math.round((Date.now()-started)/1000) : 0; started = null;
+  $("msg").textContent = "Saved at " + fmtClock(now()) + ". Students on " + DATA.routes[id.split("-")[0]].name + " see this now. This entry took " + secs + " seconds.";
+});
+$("reset").onclick = function(){ set(KEY.vendor, null); if(DATA) vendorState(DATA); $("msg").textContent = "Today’s entries reset to the sample."; };
+</script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Trip details</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<main class="page">
+<p><a href="index.html">Back to today's trips</a></p>
+<header class="top"><h1 id="title">Trip</h1><p class="sub" id="dir"></p></header>
+<p id="offline" class="banner offline" hidden></p>
+<section class="card" aria-labelledby="st-h">
+<h2 id="st-h">Status: <span id="status"></span></h2>
+<dl class="facts">
+<dt>Time</dt><dd id="time"></dd>
+<dt>Bus</dt><dd id="bus"></dd>
+<dt id="pickLbl">Where</dt><dd id="pick"></dd>
+</dl>
+<p class="age" id="age"></p>
+</section>
+<section class="card" aria-labelledby="n-h">
+<h2 id="n-h">Notice from the bus service</h2>
+<p id="note"></p>
+</section>
+<p><a href="index.html">Back to today's trips</a></p>
+</main>
+<script src="app.js"></script>
+<script>
+
+var id = q("id") || "A-1430", route = id.split("-")[0];
+loadData().then(function(d){
+  var V = vendorState(d), t = trips(d, route, "today", V).filter(function(x){ return x.id===id; })[0];
+  if(!t){ document.getElementById("title").textContent = "Trip not found"; return; }
+  var stamp = new Date(V.updatedAt);
+  document.title = fmt24(t.time) + " trip";
+  document.getElementById("title").textContent = fmt24(t.time) + " trip, " + d.routes[route].name;
+  document.getElementById("dir").textContent = t.dir;
+  document.getElementById("status").innerHTML = "<span class=\"st st-" + t.status + "\">" + esc(t.label) + "</span>";
+  document.getElementById("time").textContent = fmt24(t.time) + (t.was ? " (was " + fmt24(t.was) + ")" : "");
+  document.getElementById("bus").textContent = t.status==="notrunning" ? "None" : (t.bus ? t.bus + (t.was_bus ? " (was " + t.was_bus + ")" : "") : "Not assigned yet");
+  document.getElementById("pickLbl").textContent = t.dir==="To campus" ? "Pickup" : "Departs from";
+  document.getElementById("pick").textContent = t.pickup;
+  document.getElementById("age").textContent = "Updated " + ago(V.updatedAt) + " (" + fmtClock(stamp) + ")";
+  document.getElementById("note").textContent = t.note || ((t.status==="changed"||t.status==="notrunning") ? updateLine(t) : t.status==="pending" ? "This extra trip has not been announced yet. Check again closer to the time." : "No notice for this trip.");
+  if(isOffline()){ var o = document.getElementById("offline"); o.hidden = false; o.textContent = "No connection. Showing this trip as of " + fmtClock(stamp) + " (" + ago(V.updatedAt) + ")."; }
+}).catch(function(){ document.getElementById("title").textContent = "This trip could not load. Connect once to save trips on your phone."; });
+</script>
+</body>
+</html>

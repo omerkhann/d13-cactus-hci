@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Today on my route</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<main class="page">
+<header class="top">
+<h1 id="title">Today on your route</h1>
+<p class="sub" id="date"></p>
+</header>
+<p id="temp" class="card" hidden></p>
+<div id="live" aria-live="assertive"></div>
+<section id="offline" class="banner offline" hidden aria-labelledby="off-h">
+<h2 id="off-h">No connection</h2>
+<p id="offText"></p>
+<button type="button" class="btn ghost" id="retry">Try again</button>
+<p id="retryMsg" role="status"></p>
+</section>
+<section id="loadErr" class="banner bad" hidden aria-labelledby="err-h">
+<h2 id="err-h">Trips could not load</h2>
+<p>Connect to the internet once so this page can save your trips on your phone. After that it works without data.</p>
+<button type="button" class="btn ghost" onclick="location.reload()">Try again</button>
+</section>
+<section aria-labelledby="next-h" class="links" id="nextSec">
+<h2 id="next-h">Your next trip</h2>
+<div id="next"><p class="loading">Loading trips…</p></div>
+</section>
+<section class="card" aria-labelledby="upd-h">
+<h2 id="upd-h">Updates</h2>
+<ul class="updates" id="updates"></ul>
+<p class="age" id="age"></p>
+<a href="alerts.html" id="smsLink">Get a text when a trip changes</a>
+</section>
+<section aria-labelledby="trips-h" class="links">
+<h2 id="trips-h">All trips</h2>
+<div class="switch" role="group" aria-label="Day">
+<button type="button" id="bToday" aria-pressed="true">Today</button>
+<button type="button" id="bTomorrow" aria-pressed="false">Tomorrow</button>
+</div>
+<ul class="trips" id="list" aria-busy="true"><li class="loading">Loading trips…</li></ul>
+<p id="empty" class="card" hidden></p>
+</section>
+<nav class="links" aria-label="More">
+<a href="other.html">Other days and routes</a>
+<a href="setup.html">Change your route</a>
+</nav>
+<aside class="proto" aria-label="Prototype controls">
+<h2>Prototype controls (not part of the design)</h2>
+<a href="vendor.html" target="_blank" rel="noopener">Open the vendor page in a new tab (Wizard-of-Oz)</a>
+<button type="button" id="simOff" aria-pressed="false">Simulate no connection</button>
+<button type="button" id="clock"></button>
+<button type="button" id="reset">Reset prototype</button>
+</aside>
+</main>
+<script src="app.js"></script>
+<script>
+
+var route = q("route") || get(KEY.route);
+if(!route){ location.replace("setup.html"); }
+var temp = q("temp") && q("route"), day = "today", DATA = null, prev = null;
+var $ = function(id){ return document.getElementById(id); };
+
+function render(){
+  if(!DATA) return;
+  if(!DATA.routes[route]) route = "A";
+  var V = vendorState(DATA), r = DATA.routes[route], n = now();
+  var focusId = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.id : null;
+  var today = trips(DATA, route, "today", V), tomorrow = trips(DATA, route, "tomorrow", V);
+  var nt = nextTrip(today), stamp = new Date(V.updatedAt);
+  $("title").textContent = "Today on " + r.name;
+  $("date").textContent = dayLabel(n);
+  var t2 = new Date(n.getTime()+86400000);
+  $("bToday").textContent = "Today, " + dayLabel(n); $("bTomorrow").textContent = "Tomorrow, " + dayLabel(t2);
+  if(temp){ $("temp").hidden=false; $("temp").innerHTML = "Showing " + esc(r.name) + " for today only. <a href=\"index.html\">Back to your saved route</a>"; }
+  // Offline state (W4)
+  var off = isOffline(); $("offline").hidden = !off;
+  $("offText").textContent = "Showing your trips as of " + fmtClock(stamp) + " (" + ago(V.updatedAt) + "). This page updates when you reconnect.";
+  // Next trip (K3 fix: first thing after the heading)
+  $("next").innerHTML = nt
+    ? "<a class=\"next\" data-id=\"next\" href=\"trip.html?id=" + nt.id + "\"><span class=\"when\">" + fmt24(nt.time) + (nt.was ? " <span class=\"sub\">(was " + fmt24(nt.was) + ")</span>" : "") + "</span>"
+      + "<span><span class=\"st st-" + nt.status + "\">" + esc(nt.label) + "</span></span><span class=\"facts\">" + esc(facts(nt)) + "</span>"
+      + "<span class=\"age\">Updated " + ago(V.updatedAt) + " (" + fmtClock(stamp) + ")</span></a>"
+    : (today.length===0 ? "<p class=\"card\">No trips are listed for " + esc(r.name) + ".</p>" : "<p class=\"card\">No more trips today. Tomorrow’s first trip is at " + (tomorrow[0] ? fmt24(tomorrow[0].time) : "the usual time") + ".</p>");
+  // Updates
+  var lines = today.filter(function(t){ return t.status==="changed" || t.status==="notrunning" || (t.status==="announced" && t.kind==="extra"); })
+    .sort(function(a,b){ return (b.status==="changed") - (a.status==="changed"); }).map(updateLine);
+  $("updates").innerHTML = lines.length ? lines.map(function(l){ return "<li>" + esc(l) + "</li>"; }).join("") : "<li>No changes announced today.</li>";
+  $("age").textContent = "Updated " + ago(V.updatedAt) + " (" + fmtClock(stamp) + ")";
+  var sms = get(KEY.sms); $("smsLink").textContent = (sms && sms.route===route) ? "Text alerts are on. Change or turn off" : "Get a text when a trip changes";
+  // Trip list
+  var list = day==="today" ? today : tomorrow;
+  $("list").setAttribute("aria-busy","false"); $("list").setAttribute("aria-label", (day==="today" ? "Trips today, " + dayLabel(n) : "Trips tomorrow, " + dayLabel(t2)));
+  $("list").innerHTML = list.map(function(t){ return tripRow(t, day==="today" && nt && t.id===nt.id).replace("<a ", "<a data-id=\"" + t.id + "\" "); }).join("");
+  $("empty").hidden = list.length > 0;
+  $("empty").textContent = "No trips are listed for " + r.name + " on this day.";
+  $("bToday").setAttribute("aria-pressed", day==="today"); $("bTomorrow").setAttribute("aria-pressed", day!=="today");
+  $("simOff").setAttribute("aria-pressed", !!get(KEY.simOffline));
+  var c = get(KEY.clock); $("clock").textContent = (c && c.mode==="real") ? "Clock: real time (switch to demo 2:08 PM)" : "Clock: demo 2:08 PM (switch to real time)";
+  if(focusId){ var el = document.querySelector("[data-id=\"" + focusId + "\"]"); if(el) el.focus(); }
+  // Announce new changes from the vendor (W5)
+  var snap = {}; today.forEach(function(t){ snap[t.id] = t.status + t.time + t.bus; });
+  if(prev){ var news = today.filter(function(t){ return prev[t.id] !== snap[t.id] && t.status!=="pending" && t.kind==="extra"; });
+    if(news.length){ var cls = news.some(function(t){ return t.status==="changed" || t.status==="notrunning"; }) ? "changed" : "ok";
+      $("live").innerHTML = "<div class=\"banner " + cls + "\"><p><strong>" + news.map(function(t){ return esc(updateLine(t)); }).join(" ") + "</strong></p><button type=\"button\" class=\"btn ghost\" onclick=\"this.parentNode.remove()\">Dismiss</button></div>"; } }
+  prev = snap;
+}
+function load(){ loadData().then(function(d){ DATA = d; $("loadErr").hidden = true; render(); }).catch(function(){ $("loadErr").hidden = false; $("nextSec").hidden = true; $("list").innerHTML = ""; }); }
+$("bToday").onclick = function(){ day = "today"; render(); };
+$("bTomorrow").onclick = function(){ day = "tomorrow"; render(); };
+$("retry").onclick = function(){ if(isOffline()){ $("retryMsg").textContent = "Still no connection. Your last saved trips are shown."; } else { $("retryMsg").textContent = ""; load(); } };
+$("simOff").onclick = function(){ set(KEY.simOffline, get(KEY.simOffline) ? null : true); render(); };
+$("clock").onclick = function(){ var c = get(KEY.clock); if(c && c.mode==="real") setDemoClock(); else set(KEY.clock, {mode:"real"}); render(); };
+$("reset").onclick = function(){ [KEY.route,KEY.vendor,KEY.clock,KEY.sms,KEY.simOffline].forEach(function(k){ set(k,null); }); location.href = "setup.html"; };
+window.addEventListener("storage", function(e){ if(e.key===KEY.vendor || e.key===KEY.simOffline) render(); });
+window.addEventListener("online", load); window.addEventListener("offline", render);
+setInterval(function(){ if(DATA){ var V = vendorState(DATA), s = new Date(V.updatedAt); $("age").textContent = "Updated " + ago(V.updatedAt) + " (" + fmtClock(s) + ")"; } }, 30000);
+load();
+</script>
+</body>
+</html>

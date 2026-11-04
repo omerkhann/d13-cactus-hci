@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Other days and routes</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<main class="page">
+<p><a href="index.html">Back to today's trips</a></p>
+<header class="top"><h1>Other days and routes</h1></header>
+<section class="card" aria-labelledby="fri-h">
+<h2 id="fri-h">Friday timings, <span id="rname"></span></h2>
+<ul class="updates" id="fri"></ul>
+</section>
+<form id="f" novalidate class="links">
+<fieldset>
+<legend>Going somewhere else today?</legend>
+<label class="opt"><input type="radio" name="oroute" id="o-a" value="A"> Route A</label>
+<label class="opt"><input type="radio" name="oroute" id="o-b" value="B"> Route B</label>
+<label class="opt"><input type="radio" name="oroute" id="o-c" value="C"> Route C</label>
+</fieldset>
+<p class="sub">This shows another route for today only. Your saved route stays the same.</p>
+<button class="btn" type="submit">Show today's trips</button>
+</form>
+<p><a href="index.html">Back to today's trips</a></p>
+</main>
+<script src="app.js"></script>
+<script>
+
+var route = get(KEY.route) || "A";
+var other = document.querySelector("input[name=oroute]:not([value=\"" + route + "\"])"); if(other) other.checked = true;
+loadData().then(function(d){ var r = d.routes[route]; document.getElementById("rname").textContent = r.name;
+  var fixed = r.trips.filter(function(t){ return t.kind!=="extra"; });
+  document.getElementById("fri").innerHTML = fixed.map(function(t){ return "<li>" + fmt24(t.time) + " " + t.dir.toLowerCase() + ": " + LABEL[t.kind].toLowerCase() + "</li>"; }).join("")
+    + "<li>Extra trips usually do not run on Fridays. Check Updates on the day.</li>"; }).catch(function(){});
+document.getElementById("f").addEventListener("submit", function(e){ e.preventDefault(); var v = document.querySelector("input[name=oroute]:checked").value; location.href = "index.html?route=" + v + "&temp=1"; });
+</script>
+</body>
+</html>

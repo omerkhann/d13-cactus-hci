@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Choose your route</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<main class="page">
+<header class="top"><h1 id="title">Choose your route</h1></header>
+<p>Pick the route you usually take. The page will open on it every time.</p>
+<form id="f" novalidate class="links">
+<fieldset>
+<legend>Your route</legend>
+<label class="opt"><input type="radio" name="route" id="r-a" value="A"> Route A</label>
+<label class="opt"><input type="radio" name="route" id="r-b" value="B"> Route B</label>
+<label class="opt"><input type="radio" name="route" id="r-c" value="C"> Route C</label>
+</fieldset>
+<p class="card">Open this page once on campus Wi-Fi. It is then saved on your phone and works at the bus stand without data.</p>
+<button class="btn" id="save" type="submit" disabled>Save route</button>
+<p id="msg" role="status"></p>
+</form>
+</main>
+<script src="app.js"></script>
+<script>
+
+var f = document.getElementById("f"), b = document.getElementById("save"), msg = document.getElementById("msg"), cur = get(KEY.route);
+if(cur){ document.getElementById("title").textContent = "Change your route"; var el = f.querySelector("input[value=\"" + cur + "\"]"); if(el){ el.checked = true; b.disabled = false; } }
+f.addEventListener("change", function(){ b.disabled = !f.querySelector("input[name=route]:checked"); });
+f.addEventListener("submit", function(e){ e.preventDefault(); var v = f.querySelector("input[name=route]:checked"); if(!v) return;
+  set(KEY.route, v.value); b.disabled = true; msg.innerHTML = "<span class=\"banner ok\" style=\"display:block\"><strong>Route " + v.value + " saved.</strong> Opening today’s trips…</span>";
+  setTimeout(function(){ location.href = "index.html"; }, 900); });
+</script>
+</body>
+</html>

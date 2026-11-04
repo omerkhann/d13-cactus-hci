@@ -1,0 +1,32 @@
+{
+  "note": "Trip structure from D3 (7:00 always runs, 5:30 runs daily, other trips announced). Bus numbers and pickup points are placeholders.",
+  "routes": {
+    "A": { "name": "Route A", "trips": [
+      { "id": "A-0700", "time": "07:00", "dir": "To campus",   "kind": "always", "bus": "Bus 12", "pickup": "Stop A1" },
+      { "id": "A-0900", "time": "09:00", "dir": "To campus",   "kind": "extra",  "pickup": "Stop A2" },
+      { "id": "A-1030", "time": "10:30", "dir": "To campus",   "kind": "extra",  "pickup": "Stop A2" },
+      { "id": "A-1330", "time": "13:30", "dir": "From campus", "kind": "extra",  "pickup": "Gate 4 stand" },
+      { "id": "A-1430", "time": "14:30", "dir": "From campus", "kind": "extra",  "pickup": "Gate 4 stand" },
+      { "id": "A-1600", "time": "16:00", "dir": "From campus", "kind": "extra",  "pickup": "Gate 4 stand" },
+      { "id": "A-1730", "time": "17:30", "dir": "From campus", "kind": "daily",  "bus": "Bus 12", "pickup": "Gate 4 stand" }
+    ]},
+    "B": { "name": "Route B", "trips": [
+      { "id": "B-0700", "time": "07:00", "dir": "To campus",   "kind": "always", "bus": "Bus 3", "pickup": "Stop B1" },
+      { "id": "B-1030", "time": "10:30", "dir": "To campus",   "kind": "extra",  "pickup": "Stop B2" },
+      { "id": "B-1430", "time": "14:30", "dir": "From campus", "kind": "extra",  "pickup": "Gate 4 stand" },
+      { "id": "B-1730", "time": "17:30", "dir": "From campus", "kind": "daily",  "bus": "Bus 3", "pickup": "Gate 4 stand" }
+    ]},
+    "C": { "name": "Route C", "trips": [] }
+  },
+  "sample": {
+    "minutesAgo": 12,
+    "trips": {
+      "A-0900": { "status": "announced", "bus": "Bus 7" },
+      "A-1030": { "status": "announced", "bus": "Bus 7" },
+      "A-1330": { "status": "notrunning", "note": "Not running today: driver shortage." },
+      "A-1430": { "status": "announced", "bus": "Bus 11", "note": "Bus 11 assigned. Leaves from the Gate 4 stand." },
+      "B-1030": { "status": "announced", "bus": "Bus 5" }
+    },
+    "notices": []
+  }
+}

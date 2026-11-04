@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Text message alerts</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<main class="page">
+<p><a href="index.html">Back to today's trips</a></p>
+<header class="top"><h1>Text message alerts</h1></header>
+<p>Get a text when a trip on <strong id="rname">your route</strong> changes or is cancelled. Texts arrive without mobile data.</p>
+<form id="f" novalidate class="card">
+<div class="field">
+<label for="phone">Mobile number</label>
+<span id="hint" class="sub">11 digits, starting with 03</span>
+<input type="tel" id="phone" name="phone" inputmode="numeric" autocomplete="tel" aria-describedby="hint">
+<p id="err" class="err" hidden>That number doesn't look right. Enter an 11-digit mobile number starting with 03.</p>
+</div>
+<button class="btn" type="submit">Turn on text alerts</button>
+</form>
+<div id="done" class="banner ok" role="status" hidden><p id="doneText"></p><button type="button" class="btn ghost" id="off">Turn off text alerts</button></div>
+<p><a href="index.html">Back to today's trips</a></p>
+<aside class="proto" aria-label="Prototype controls"><h2>Prototype controls (not part of the design)</h2><p>No text message is actually sent in this prototype.</p></aside>
+</main>
+<script src="app.js"></script>
+<script>
+
+var route = get(KEY.route) || "A", name = "Route " + route;
+document.getElementById("rname").textContent = name;
+var f = document.getElementById("f"), i = document.getElementById("phone"), err = document.getElementById("err"), done = document.getElementById("done");
+function show(){ var s = get(KEY.sms); if(s && s.route===route){ f.hidden = true; done.hidden = false; document.getElementById("doneText").innerHTML = "<strong>Text alerts are on for " + esc(name) + ".</strong> We will text " + esc(s.phone) + " when a trip changes."; } else { f.hidden = false; done.hidden = true; } }
+f.addEventListener("submit", function(e){ e.preventDefault(); var v = i.value.replace(/[\s-]/g, "");
+  if(!/^03\d{9}$/.test(v)){ err.hidden = false; i.setAttribute("aria-invalid","true"); i.setAttribute("aria-describedby","hint err"); i.focus(); return; }
+  err.hidden = true; i.removeAttribute("aria-invalid"); i.setAttribute("aria-describedby","hint");
+  set(KEY.sms, {route:route, phone:v}); show(); document.getElementById("off").focus(); });
+document.getElementById("off").onclick = function(){ set(KEY.sms, null); i.value = ""; show(); i.focus(); };
+show();
+</script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Trip changed</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="frame">
+<p class="wtag" aria-hidden="true">W5 · Trip changed (alternate path)</p>
+<header class="bar"><h1>Today on Route A</h1><a href="w1.html" class="small">Change route</a></header>
+<section class="box strong" aria-labelledby="upd-h">
+<h2 id="upd-h">Updates</h2>
+<p id="alert" role="alert"><strong>CHANGED:</strong> The 2:30 PM return now leaves at 2:20 PM on Bus 14, from the Gate 4 stand.</p>
+<ul class="small" style="margin:0;padding-left:20px"><li>1:30 PM return is not running today.</li></ul>
+<p class="age">Updated just now (2:10 PM)</p>
+<a href="w6.html" class="small">Get a text message when a trip changes</a>
+</section>
+<section aria-labelledby="trips-h" style="display:flex;flex-direction:column;gap:12px">
+<h2 id="trips-h">Trips today, Wed 4 Nov</h2>
+<ul class="trips" id="list"></ul>
+</section>
+<a href="w7.html">Other days and routes</a>
+<aside class="proto" aria-label="Prototype controls">
+<h2>Prototype controls (not part of the design)</h2>
+<p class="muted">The text message this change would send is simulated; this on-page alert stands in for it.</p>
+<a href="index.html">All screens</a>
+</aside>
+</main>
+<script src="app.js"></script>
+<script>
+renderList(document.getElementById("list"), changedTrips("A"), "A", {changed:true});
+</script>
+</body>
+</html>

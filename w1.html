@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Choose your route</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="frame">
+<p class="wtag" aria-hidden="true">W1 · First visit</p>
+<header class="bar"><h1>Choose your route</h1></header>
+<p>Pick the route you usually take. The page will open on it every time.</p>
+<form id="routeForm" novalidate>
+<fieldset>
+<legend>Your route</legend>
+<label class="opt"><input type="radio" name="route" id="r-a" value="A"> Route A</label>
+<label class="opt"><input type="radio" name="route" id="r-b" value="B"> Route B</label>
+<label class="opt"><input type="radio" name="route" id="r-c" value="C" disabled> Route C <span class="muted small">(no trips in this prototype)</span></label>
+</fieldset>
+<p class="box fill small">Open this page once on campus Wi-Fi. It is then saved on your phone and works at the bus stand without data.</p>
+<p><button class="btn" id="saveBtn" type="submit" disabled>Save route</button></p>
+<p id="saveMsg" role="status" class="small"></p>
+</form>
+<aside class="proto" aria-label="Prototype controls">
+<h2>Prototype controls (not part of the design)</h2>
+
+<a href="index.html">All screens</a>
+</aside>
+</main>
+<script src="app.js"></script>
+<script>
+var f=document.getElementById("routeForm"),b=document.getElementById("saveBtn"),m=document.getElementById("saveMsg");
+f.addEventListener("change",function(){ b.disabled=!f.querySelector("input[name=route]:checked"); });
+f.addEventListener("submit",function(e){ e.preventDefault(); var v=f.querySelector("input[name=route]:checked"); if(!v) return;
+ try{ localStorage.setItem("route",v.value); }catch(err){}
+ m.textContent="Route "+v.value+" saved. Opening today’s trips…"; setTimeout(function(){ location.href="w2.html?route="+v.value; },700); });
+</script>
+</body>
+</html>

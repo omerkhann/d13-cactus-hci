@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Trip detail</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="frame">
+<p class="wtag" aria-hidden="true">W3 · Trip detail</p>
+<header class="bar"><h1 id="title">2:30 PM trip</h1></header>
+<p><a id="back" href="w2.html">Back to today's trips</a></p>
+<section class="box strong" aria-labelledby="st-h">
+<h2 id="st-h">Status: <span id="status"></span></h2>
+<dl class="dl">
+<dt>Direction</dt><dd id="dir"></dd>
+<dt>Bus</dt><dd id="bus"></dd>
+<dt>Where</dt><dd id="pick"></dd>
+</dl>
+<p class="age">Updated 12 min ago (2:08 PM)</p>
+</section>
+<section class="box" aria-labelledby="n-h">
+<h2 id="n-h">Notice from the bus service</h2>
+<p id="note"></p>
+</section>
+<aside class="proto" aria-label="Prototype controls">
+<h2>Prototype controls (not part of the design)</h2>
+
+<a href="index.html">All screens</a>
+</aside>
+</main>
+<script src="app.js"></script>
+<script>
+var r=routeKey(), ch=q("changed"), t=findTrip(r,q("trip"),ch);
+document.getElementById("title").textContent=t.time+" trip";
+document.getElementById("status").textContent=t.status;
+document.getElementById("dir").textContent=t.dir;
+document.getElementById("bus").textContent=t.bus||"Not assigned yet";
+document.getElementById("pick").textContent=t.pick||"Not running";
+document.getElementById("note").textContent=t.note||"No notice for this trip.";
+document.getElementById("back").href=(ch?"w5.html":"w2.html")+"?route="+r;
+</script>
+</body>
+</html>

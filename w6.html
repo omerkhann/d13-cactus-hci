@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Text message alerts</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="frame">
+<p class="wtag" aria-hidden="true">W6 · SMS sign-up</p>
+<header class="bar"><h1>Text message alerts</h1></header>
+<p><a href="w2.html">Back to today's trips</a></p>
+<p>Get a text when a trip on <strong id="rname">Route A</strong> changes or is cancelled. Texts work without mobile data.</p>
+<form id="smsForm" novalidate class="box">
+<div class="field">
+<label for="phone"><strong>Mobile number</strong></label>
+<span id="hint" class="small muted">11 digits, starting with 03</span>
+<input type="tel" id="phone" name="phone" inputmode="numeric" autocomplete="tel" aria-describedby="hint">
+<p id="phoneErr" class="err small" hidden>That number doesn't look right. Enter an 11-digit mobile number starting with 03.</p>
+</div>
+<p><button class="btn" type="submit" id="smsBtn">Turn on text alerts</button></p>
+</form>
+<p id="smsDone" class="box strong" role="status" hidden></p>
+<aside class="proto" aria-label="Prototype controls">
+<h2>Prototype controls (not part of the design)</h2>
+<p class="muted">No text is actually sent in this prototype.</p>
+<a href="index.html">All screens</a>
+</aside>
+</main>
+<script src="app.js"></script>
+<script>
+var r=routeKey(); document.getElementById("rname").textContent=DATA[r].name;
+var f=document.getElementById("smsForm"), i=document.getElementById("phone"), e=document.getElementById("phoneErr"), done=document.getElementById("smsDone");
+f.addEventListener("submit",function(ev){ ev.preventDefault(); var v=i.value.replace(/[\s-]/g,"");
+ if(!/^03\d{9}$/.test(v)){ e.hidden=false; i.setAttribute("aria-invalid","true"); i.setAttribute("aria-describedby","hint phoneErr"); i.focus(); return; }
+ e.hidden=true; i.removeAttribute("aria-invalid"); f.hidden=true; done.hidden=false;
+ done.textContent="Text alerts are on for "+DATA[r].name+". We will text "+v+" when a trip changes."; });
+</script>
+</body>
+</html>

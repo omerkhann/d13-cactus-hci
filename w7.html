@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Other days and routes</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="frame">
+<p class="wtag" aria-hidden="true">W7 · Other days and routes</p>
+<header class="bar"><h1>Other days and routes</h1></header>
+<p><a href="w2.html">Back to today's trips</a></p>
+<section class="box" aria-labelledby="fri-h">
+<h2 id="fri-h">Friday timings</h2>
+<ul class="small" style="margin:0;padding-left:20px">
+<li>7:00 AM to campus: always runs</li>
+<li>5:30 PM from campus: runs daily</li>
+<li>Extra trips usually do not run on Fridays. Check Updates on the day.</li>
+</ul>
+</section>
+<form id="otherForm" class="box" novalidate>
+<fieldset>
+<legend>Going somewhere else today?</legend>
+<label class="opt"><input type="radio" name="oroute" id="o-a" value="A"> Route A</label>
+<label class="opt"><input type="radio" name="oroute" id="o-b" value="B" checked> Route B</label>
+</fieldset>
+<p class="small muted">This shows another route for today only. Your saved route stays the same.</p>
+<p><button class="btn" type="submit">Show today's trips</button></p>
+</form>
+<aside class="proto" aria-label="Prototype controls">
+<h2>Prototype controls (not part of the design)</h2>
+
+<a href="index.html">All screens</a>
+</aside>
+</main>
+<script src="app.js"></script>
+<script>
+document.getElementById("otherForm").addEventListener("submit",function(e){ e.preventDefault();
+ var v=document.querySelector("input[name=oroute]:checked").value; location.href="w2.html?route="+v+"&temp=1"; });
+</script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>No connection</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="frame">
+<p class="wtag" aria-hidden="true">W4 · Offline (error path)</p>
+<header class="bar"><h1 id="title">Today on Route A</h1></header>
+<section class="box strong" aria-labelledby="off-h">
+<h2 id="off-h">No connection</h2>
+<p>Showing your trips as of 2:08 PM (12 min ago). This page updates when you reconnect.</p>
+<p><a class="btn secondary" id="retry" href="w2.html">Try again</a></p>
+</section>
+<section aria-labelledby="trips-h" style="display:flex;flex-direction:column;gap:12px">
+<h2 id="trips-h">Trips, last known</h2>
+<ul class="trips" id="list"></ul>
+</section>
+<aside class="proto" aria-label="Prototype controls">
+<h2>Prototype controls (not part of the design)</h2>
+
+<a href="index.html">All screens</a>
+</aside>
+</main>
+<script src="app.js"></script>
+<script>
+var r=routeKey(), d=DATA[r];
+document.getElementById("title").textContent="Today on "+d.name;
+document.getElementById("retry").href="w2.html?route="+r;
+renderList(document.getElementById("list"), d.today, r);
+</script>
+</body>
+</html>
